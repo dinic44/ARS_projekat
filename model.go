@@ -1,6 +1,5 @@
 package main
 
 type Config struct {
-	Id      string   `json:"id"`
-	Entries []string `json:"entries"`
+	Entries map[string]string `json:"entries"`
 }

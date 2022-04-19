@@ -9,7 +9,7 @@ import (
 )
 
 type postServer struct {
-	data map[string]*Config // izigrava bazu podataka
+	data map[string]*Config
 }
 
 func (ts *postServer) createPostHandler(w http.ResponseWriter, req *http.Request) {
