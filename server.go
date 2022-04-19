@@ -26,6 +26,16 @@ func (ts *postServer) createPostHandler(w http.ResponseWriter, req *http.Request
 		return
 	}
 
+	/*	rt, err := decodeBody(req.Body)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		id := createId()
+		rt.Id = id
+		ts.data[id] = rt
+		renderJSON(w, rt)*/
 }
 
 func (ts *postServer) getAllHandler(w http.ResponseWriter, req *http.Request) {
@@ -57,7 +67,6 @@ func (ts *postServer) delPostHandler(w http.ResponseWriter, req *http.Request) {
 		err := errors.New("key not found")
 		http.Error(w, err.Error(), http.StatusNotFound)
 	}
-
 }
 
 func renderJSON(w http.ResponseWriter, v interface{}) {
