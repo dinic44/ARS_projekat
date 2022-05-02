@@ -14,7 +14,7 @@ type Service struct {
 	Data map[string][]*Config `json:"data"`
 }
 
-//Create a Post
+//Create
 func (ts *Service) createConfigHandler(w http.ResponseWriter, req *http.Request) {
 	contentType := req.Header.Get("Content-Type")
 	mediatype, _, err := mime.ParseMediaType(contentType)
@@ -41,6 +41,39 @@ func (ts *Service) createConfigHandler(w http.ResponseWriter, req *http.Request)
 	w.Write([]byte(id))
 }
 
+//Put/{id}
+func (ts *Service) updateConfigHandler(w http.ResponseWriter, req *http.Request) {
+	contentType := req.Header.Get("Content-Type")
+	mediatype, _, err := mime.ParseMediaType(contentType)
+
+	if mediatype != "application/json" {
+		err := errors.New("Expect application/json Content-Type")
+		http.Error(w, err.Error(), http.StatusUnsupportedMediaType)
+		return
+	}
+
+	rt, err := decodeBody(req.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	id := mux.Vars(req)["id"]
+	task, err2 := ts.Data[id]
+	if !err2 {
+		err2 := errors.New("key not found")
+		http.Error(w, err2.Error(), http.StatusNotFound)
+		return
+	}
+
+	for _, config := range rt {
+		task = append(task, config)
+	}
+
+	ts.Data[id] = task
+	renderJSON(w, task)
+}
+
 //Get All
 func (ts *Service) getAllHandler(w http.ResponseWriter, req *http.Request) {
 	allTasks := []*Config{}
@@ -51,7 +84,7 @@ func (ts *Service) getAllHandler(w http.ResponseWriter, req *http.Request) {
 	renderJSON(w, allTasks)
 }
 
-//Get a Single by /id
+//Get/{id}
 func (ts *Service) getConfigHandler(w http.ResponseWriter, req *http.Request) {
 	id := mux.Vars(req)["id"]
 	task, ok := ts.Data[id]
@@ -63,7 +96,7 @@ func (ts *Service) getConfigHandler(w http.ResponseWriter, req *http.Request) {
 	renderJSON(w, task)
 }
 
-//Delete a single by /id
+//Delete/{id}
 func (ts *Service) delConfigHandler(w http.ResponseWriter, req *http.Request) {
 	id := mux.Vars(req)["id"]
 	if v, ok := ts.Data[id]; ok {
