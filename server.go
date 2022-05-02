@@ -3,17 +3,19 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"io"
 	"mime"
 	"net/http"
 )
 
-type postServer struct {
-	data map[string]*Config
+type Service struct {
+	Data map[string][]*Config `json:"data"`
 }
 
-func (ts *postServer) createPostHandler(w http.ResponseWriter, req *http.Request) {
+//Create a Post
+func (ts *Service) createPostHandler(w http.ResponseWriter, req *http.Request) {
 	contentType := req.Header.Get("Content-Type")
 	mediatype, _, err := mime.ParseMediaType(contentType)
 	if err != nil {
@@ -33,35 +35,30 @@ func (ts *postServer) createPostHandler(w http.ResponseWriter, req *http.Request
 		return
 	}
 
-	/*id := createId()
+	id := createId()
 	rt.Id = id
-	ts.data[id] = rt*/
+	ts.Data[id] = rt
 	renderJSON(w, rt)
 }
 
-func decodeBody(r io.Reader) (*Config, error) {
-	dec := json.NewDecoder(r)
-	dec.DisallowUnknownFields()
-
-	var rt Config
-	if err := dec.Decode(&rt); err != nil {
-		return nil, err
-	}
-	return &rt, nil
+func createId() string {
+	return uuid.New().String()
 }
 
-func (ts *postServer) getAllHandler(w http.ResponseWriter, req *http.Request) {
+//Get All
+func (ts *Service) getAllHandler(w http.ResponseWriter, req *http.Request) {
 	allTasks := []*Config{}
-	for _, v := range ts.data {
-		allTasks = append(allTasks, v)
+	for _, v := range ts.Data {
+		allTasks = append(allTasks, v...)
 	}
 
 	renderJSON(w, allTasks)
 }
 
-func (ts *postServer) getPostHandler(w http.ResponseWriter, req *http.Request) {
+//Get a Single by /id
+func (ts *Service) getPostHandler(w http.ResponseWriter, req *http.Request) {
 	id := mux.Vars(req)["id"]
-	task, ok := ts.data[id]
+	task, ok := ts.Data[id]
 	if !ok {
 		err := errors.New("key not found")
 		http.Error(w, err.Error(), http.StatusNotFound)
@@ -70,10 +67,11 @@ func (ts *postServer) getPostHandler(w http.ResponseWriter, req *http.Request) {
 	renderJSON(w, task)
 }
 
-func (ts *postServer) delPostHandler(w http.ResponseWriter, req *http.Request) {
+//Delete a single by /id
+func (ts *Service) delPostHandler(w http.ResponseWriter, req *http.Request) {
 	id := mux.Vars(req)["id"]
-	if v, ok := ts.data[id]; ok {
-		delete(ts.data, id)
+	if v, ok := ts.Data[id]; ok {
+		delete(ts.Data, id)
 		renderJSON(w, v)
 	} else {
 		err := errors.New("key not found")
@@ -90,4 +88,15 @@ func renderJSON(w http.ResponseWriter, v interface{}) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
+}
+
+func decodeBody(r io.Reader) (*Config, error) {
+	dec := json.NewDecoder(r)
+	dec.DisallowUnknownFields()
+
+	var rt Config
+	if err := dec.Decode(&rt); err != nil {
+		return nil, err
+	}
+	return &rt, nil
 }
