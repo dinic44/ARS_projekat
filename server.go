@@ -64,7 +64,7 @@ func (ts *Service) getConfigHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 //Delete a single by /id
-func (ts *Service) delCOnfigHandler(w http.ResponseWriter, req *http.Request) {
+func (ts *Service) delConfigHandler(w http.ResponseWriter, req *http.Request) {
 	id := mux.Vars(req)["id"]
 	if v, ok := ts.Data[id]; ok {
 		delete(ts.Data, id)
