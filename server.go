@@ -35,14 +35,13 @@ func (ts *Service) createPostHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	/*var decoded map[string][]*Config
+	err = json.Unmarshal([]*Config, &decoded)*/
+
 	id := createId()
-	rt.Id = id
 	ts.Data[id] = rt
 	renderJSON(w, rt)
-}
-
-func createId() string {
-	return uuid.New().String()
+	w.Write([]byte(id))
 }
 
 //Get All
@@ -90,13 +89,18 @@ func renderJSON(w http.ResponseWriter, v interface{}) {
 	w.Write(js)
 }
 
-func decodeBody(r io.Reader) (*Config, error) {
+func decodeBody(r io.Reader) ([]*Config, error) {
 	dec := json.NewDecoder(r)
 	dec.DisallowUnknownFields()
 
-	var rt Config
+	var rt []*Config
+
 	if err := dec.Decode(&rt); err != nil {
 		return nil, err
 	}
-	return &rt, nil
+	return rt, nil
+}
+
+func createId() string {
+	return uuid.New().String()
 }
