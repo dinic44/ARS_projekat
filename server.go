@@ -15,7 +15,7 @@ type Service struct {
 }
 
 //Create a Post
-func (ts *Service) createPostHandler(w http.ResponseWriter, req *http.Request) {
+func (ts *Service) createConfigHandler(w http.ResponseWriter, req *http.Request) {
 	contentType := req.Header.Get("Content-Type")
 	mediatype, _, err := mime.ParseMediaType(contentType)
 	if err != nil {
@@ -55,7 +55,7 @@ func (ts *Service) getAllHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 //Get a Single by /id
-func (ts *Service) getPostHandler(w http.ResponseWriter, req *http.Request) {
+func (ts *Service) getConfigHandler(w http.ResponseWriter, req *http.Request) {
 	id := mux.Vars(req)["id"]
 	task, ok := ts.Data[id]
 	if !ok {
@@ -67,7 +67,7 @@ func (ts *Service) getPostHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 //Delete a single by /id
-func (ts *Service) delPostHandler(w http.ResponseWriter, req *http.Request) {
+func (ts *Service) delCOnfigHandler(w http.ResponseWriter, req *http.Request) {
 	id := mux.Vars(req)["id"]
 	if v, ok := ts.Data[id]; ok {
 		delete(ts.Data, id)

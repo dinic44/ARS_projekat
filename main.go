@@ -21,10 +21,11 @@ func main() {
 	server := Service{
 		Data: map[string][]*Config{},
 	}
-	router.HandleFunc("/post/", server.createPostHandler).Methods("POST")
-	router.HandleFunc("/posts/", server.getAllHandler).Methods("GET")
-	router.HandleFunc("/post/{id}/", server.getPostHandler).Methods("GET")
-	router.HandleFunc("/post/{id}/", server.delPostHandler).Methods("DELETE")
+	router.HandleFunc("/config/", server.createConfigHandler).Methods("POST")
+	router.HandleFunc("/configs/", server.getAllHandler).Methods("GET")
+	router.HandleFunc("/config/{id}/", server.getConfigHandler).Methods("GET")
+	router.HandleFunc("/config/{id}/", server.delCOnfigHandler).Methods("DELETE")
+	//router.HandleFunc("/config/{id}/")
 
 	srv := &http.Server{Addr: "0.0.0.0:8000", Handler: router}
 	go func() {
