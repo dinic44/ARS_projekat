@@ -63,7 +63,7 @@ func (ts *Service) getConfigHandler(w http.ResponseWriter, req *http.Request) {
 	renderJSON(w, task)
 }
 
-//Delete a single by /id
+//Delete
 func (ts *Service) delConfigHandler(w http.ResponseWriter, req *http.Request) {
 	id := mux.Vars(req)["id"]
 	if v, ok := ts.Data[id]; ok {
@@ -73,6 +73,39 @@ func (ts *Service) delConfigHandler(w http.ResponseWriter, req *http.Request) {
 		err := errors.New("key not found")
 		http.Error(w, err.Error(), http.StatusNotFound)
 	}
+}
+
+//Update
+func (ts *Service) updateConfigHandler(w http.ResponseWriter, req *http.Request) {
+	contentType := req.Header.Get("Content-Type")
+	mediatype, _, err := mime.ParseMediaType(contentType)
+
+	if mediatype != "application/json" {
+		err := errors.New("Expect application/json Content-Type")
+		http.Error(w, err.Error(), http.StatusUnsupportedMediaType)
+		return
+	}
+
+	rt, err := decodeBody(req.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	id := mux.Vars(req)["id"]
+	task, err2 := ts.Data[id]
+	if !err2 {
+		err2 := errors.New("key not found")
+		http.Error(w, err2.Error(), http.StatusNotFound)
+		return
+	}
+
+	for _, config := range rt {
+		task = append(task, config)
+	}
+
+	ts.Data[id] = task
+	renderJSON(w, task)
 }
 
 func renderJSON(w http.ResponseWriter, v interface{}) {
