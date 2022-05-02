@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/gorilla/mux"
+	"io"
 	"mime"
 	"net/http"
 )
@@ -26,16 +27,27 @@ func (ts *postServer) createPostHandler(w http.ResponseWriter, req *http.Request
 		return
 	}
 
-	/*	rt, err := decodeBody(req.Body)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
+	rt, err := decodeBody(req.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-		id := createId()
-		rt.Id = id
-		ts.data[id] = rt
-		renderJSON(w, rt)*/
+	/*id := createId()
+	rt.Id = id
+	ts.data[id] = rt*/
+	renderJSON(w, rt)
+}
+
+func decodeBody(r io.Reader) (*Config, error) {
+	dec := json.NewDecoder(r)
+	dec.DisallowUnknownFields()
+
+	var rt Config
+	if err := dec.Decode(&rt); err != nil {
+		return nil, err
+	}
+	return &rt, nil
 }
 
 func (ts *postServer) getAllHandler(w http.ResponseWriter, req *http.Request) {
