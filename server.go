@@ -35,9 +35,6 @@ func (ts *Service) createConfigHandler(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	/*var decoded map[string][]*Config
-	err = json.Unmarshal([]*Config, &decoded)*/
-
 	id := createId()
 	ts.Data[id] = rt
 	renderJSON(w, rt)

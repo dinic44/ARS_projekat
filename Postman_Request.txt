@@ -1,0 +1,48 @@
+Get Configs
+
+GET localhost:8000/configs/
+
+-----------------------------
+
+Get Single Config
+
+GET localhost:8000/config/{id}
+
+-----------------------------
+
+Create Config
+
+POST localhost:8000/config/
+
+Single
+[
+    {
+   "entries": {
+         "Name": "name",
+         "LastName": "last"
+     }
+    }
+]
+
+Group
+[
+    {
+       "entries":
+       {
+            "Name": "name1",
+            "LastName": "last1"
+        }
+    },
+        {
+       "entries":
+       {
+            "Name": "name2",
+            "LastName": "last2"
+        }
+    }
+]
+-----------------------------
+
+Delete Config
+
+DELETE localhost:8000/Config/{id}
