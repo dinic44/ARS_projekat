@@ -29,7 +29,7 @@ func main() {
 
 	srv := &http.Server{Addr: "0.0.0.0:8000", Handler: router}
 	go func() {
-		log.Println("server starting")
+		log.Println("Server Starting-----")
 		if err := srv.ListenAndServe(); err != nil {
 			if err != http.ErrServerClosed {
 				log.Fatal(err)
@@ -39,7 +39,7 @@ func main() {
 
 	<-quit
 
-	log.Println("service shutting down ...")
+	log.Println("Service Shutting Down ...")
 
 	// gracefully stop server
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -48,5 +48,5 @@ func main() {
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatal(err)
 	}
-	log.Println("server stopped")
+	log.Println("Server Stopped-----")
 }

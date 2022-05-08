@@ -1,18 +1,15 @@
-Get Configs
-
-GET localhost:8000/configs
-
------------------------------
-
-Get Single Config
-
-GET localhost:8000/config/{id}
+GET All Configs
+localhost:8000/configs
 
 -----------------------------
 
-Create Config
+GET Single Config
+localhost:8000/config/{id}
 
-POST localhost:8000/config
+-----------------------------
+
+POST Config
+localhost:8000/config
 
 Single
 [
@@ -44,12 +41,9 @@ Group
 
 -----------------------------
 
-Delete Config
-
-DELETE localhost:8000/Config/{id}
+DELETE Config
+localhost:8000/Config/{id}
 
 -----------------------------
-
-Update Config
-
-PUT localhost:8000/config/{id}
+PUT Config
+localhost:8000/config/{id}
