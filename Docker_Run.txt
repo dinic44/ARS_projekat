@@ -1,2 +1,9 @@
-docker build --tag latest .
-docker run -p 8000:8000 latest
+-----Build Docker Image
+docker image build -t latest .
+
+-----Create and Run Container
+docker run -p 8000:8000 latest(image name)
+
+-----Stop and Start Container
+Docker Start --Container Name--
+Docker Stop --Container Name--
