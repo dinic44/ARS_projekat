@@ -17,7 +17,8 @@ Single
    "entries": {
          "Name": "name",
          "LastName": "last"
-     }
+     },
+     "version": "v1"
     }
 ]
 
@@ -28,14 +29,16 @@ Group
        {
             "Name": "name1",
             "LastName": "last1"
-        }
+        },
+        "version": "v1"
     },
         {
        "entries":
        {
             "Name": "name2",
             "LastName": "last2"
-        }
+        },
+        "version": "v2"
     }
 ]
 

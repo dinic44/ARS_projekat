@@ -21,10 +21,14 @@ func main() {
 	server := Service{
 		Data: map[string][]*Config{},
 	}
-	router.HandleFunc("/config", server.createConfigHandler).Methods("POST")     //Create
-	router.HandleFunc("/configs", server.getAllHandler).Methods("GET")           //All
-	router.HandleFunc("/config/{id}", server.getConfigHandler).Methods("GET")    //FindOne
+	router.HandleFunc("/config", server.createConfigHandler).Methods("POST") //Create
+
+	router.HandleFunc("/configs", server.getAllConfigHandler).Methods("GET") //All
+
+	router.HandleFunc("/config/{id}/{version}", server.getConfigHandler).Methods("GET") //FindOne{id}
+
 	router.HandleFunc("/config/{id}", server.delConfigHandler).Methods("DELETE") //Delete
+
 	router.HandleFunc("/config/{id}", server.updateConfigHandler).Methods("PUT") //Update
 
 	srv := &http.Server{Addr: "0.0.0.0:8000", Handler: router}
@@ -41,7 +45,6 @@ func main() {
 
 	log.Println("Service Shutting Down ...")
 
-	// gracefully stop server
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 

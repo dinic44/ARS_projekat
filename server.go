@@ -75,7 +75,7 @@ func (ts *Service) updateConfigHandler(w http.ResponseWriter, req *http.Request)
 }
 
 //Get All
-func (ts *Service) getAllHandler(w http.ResponseWriter, req *http.Request) {
+func (ts *Service) getAllConfigHandler(w http.ResponseWriter, req *http.Request) {
 	allTasks := []*Config{}
 	for _, v := range ts.Data {
 		allTasks = append(allTasks, v...)
@@ -84,7 +84,7 @@ func (ts *Service) getAllHandler(w http.ResponseWriter, req *http.Request) {
 	renderJSON(w, allTasks)
 }
 
-//Get/{id}
+//Get/{id}/{version}
 func (ts *Service) getConfigHandler(w http.ResponseWriter, req *http.Request) {
 	id := mux.Vars(req)["id"]
 	task, ok := ts.Data[id]
@@ -95,6 +95,18 @@ func (ts *Service) getConfigHandler(w http.ResponseWriter, req *http.Request) {
 	}
 	renderJSON(w, task)
 }
+
+//Get/{version}        TEST
+/*func (ts *Service) getConfigVersionHandler(w http.ResponseWriter, req *http.Request) {
+	version := mux.Vars(req)["version"]
+	task, ok := ts.Data[version]
+	if !ok {
+		err := errors.New("key not found")
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+	renderJSON(w, task)
+}*/
 
 //Delete/{id}
 func (ts *Service) delConfigHandler(w http.ResponseWriter, req *http.Request) {
