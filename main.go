@@ -21,13 +21,17 @@ func main() {
 	server := Service{
 		Data: map[string][]*Config{},
 	}
-	router.HandleFunc("/config", server.createConfigHandler).Methods("POST") //Create
+	router.HandleFunc("/config", server.createSingleConfigHandler).Methods("POST") //Create Single
+	router.HandleFunc("/configs", server.createGroupConfigHandler).Methods("POST") //Create Group
 
-	router.HandleFunc("/configs", server.getAllConfigHandler).Methods("GET") //All
+	router.HandleFunc("/config", server.getAllSingleConfigHandler).Methods("GET") //All Single
+	router.HandleFunc("/configs", server.getAllGroupConfigHandler).Methods("GET") //All Group
 
-	router.HandleFunc("/config/{id}/{version}", server.getConfigHandler).Methods("GET") //FindOne{id}
+	router.HandleFunc("/config/{id}", server.getSingleConfigHandler).Methods("GET") //Find One Single {id}
+	router.HandleFunc("/configs/{id}", server.getGroupConfigHandler).Methods("GET") //Find One Group {id}
 
-	router.HandleFunc("/config/{id}", server.delConfigHandler).Methods("DELETE") //Delete
+	router.HandleFunc("/config/{id}", server.deleteSingleConfigHandler).Methods("DELETE") //Delete Single {id}
+	router.HandleFunc("/configs/{id}", server.deleteGroupConfigHandler).Methods("DELETE") //Delete Group {id}
 
 	router.HandleFunc("/config/{id}", server.updateConfigHandler).Methods("PUT") //Update
 

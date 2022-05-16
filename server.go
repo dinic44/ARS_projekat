@@ -14,8 +14,8 @@ type Service struct {
 	Data map[string][]*Config `json:"data"`
 }
 
-//Create
-func (ts *Service) createConfigHandler(w http.ResponseWriter, req *http.Request) {
+//Create Single
+func (ts *Service) createSingleConfigHandler(w http.ResponseWriter, req *http.Request) {
 	contentType := req.Header.Get("Content-Type")
 	mediatype, _, err := mime.ParseMediaType(contentType)
 	if err != nil {
@@ -30,8 +30,8 @@ func (ts *Service) createConfigHandler(w http.ResponseWriter, req *http.Request)
 	}
 
 	rt, err := decodeBody(req.Body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	if err != nil || len(rt) > 1 {
+		http.Error(w, "Invalid Format is > 1", http.StatusBadRequest)
 		return
 	}
 
@@ -39,6 +39,81 @@ func (ts *Service) createConfigHandler(w http.ResponseWriter, req *http.Request)
 	ts.Data[id] = rt
 	renderJSON(w, rt)
 	w.Write([]byte(id))
+}
+
+//Create Group
+func (ts *Service) createGroupConfigHandler(w http.ResponseWriter, req *http.Request) {
+	contentType := req.Header.Get("Content-Type")
+	mediatype, _, err := mime.ParseMediaType(contentType)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if mediatype != "application/json" {
+		err := errors.New("expect application/json Content-Type")
+		http.Error(w, err.Error(), http.StatusUnsupportedMediaType)
+		return
+	}
+
+	rt, err := decodeBody(req.Body)
+	if err != nil || len(rt) == 1 {
+		http.Error(w, "Invalid Format is == 1", http.StatusBadRequest)
+		return
+	}
+
+	id := createId()
+	ts.Data[id] = rt
+	renderJSON(w, rt)
+	w.Write([]byte(id))
+}
+
+//Get All Single
+func (ts *Service) getAllSingleConfigHandler(w http.ResponseWriter, req *http.Request) {
+	allTasks := []*Config{}
+	for _, v := range ts.Data {
+		if len(v) == 1 {
+			allTasks = append(allTasks, v...)
+		}
+	}
+
+	renderJSON(w, allTasks)
+}
+
+//Get All Group
+func (ts *Service) getAllGroupConfigHandler(w http.ResponseWriter, req *http.Request) {
+	allTasks := []*Config{}
+	for _, v := range ts.Data {
+		if len(v) > 1 {
+			allTasks = append(allTasks, v...)
+		}
+	}
+
+	renderJSON(w, allTasks)
+}
+
+//Get/{id} Single
+func (ts *Service) getSingleConfigHandler(w http.ResponseWriter, req *http.Request) {
+	id := mux.Vars(req)["id"]
+	task, ok := ts.Data[id]
+	if !ok || len(task) > 1 {
+		err := errors.New("key not found")
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+	renderJSON(w, task)
+}
+
+//Get/{id} Group
+func (ts *Service) getGroupConfigHandler(w http.ResponseWriter, req *http.Request) {
+	id := mux.Vars(req)["id"]
+	task, ok := ts.Data[id]
+	if !ok || len(task) == 1 {
+		err := errors.New("key not found")
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+	renderJSON(w, task)
 }
 
 //Put/{id}
@@ -74,46 +149,24 @@ func (ts *Service) updateConfigHandler(w http.ResponseWriter, req *http.Request)
 	renderJSON(w, task)
 }
 
-//Get All
-func (ts *Service) getAllConfigHandler(w http.ResponseWriter, req *http.Request) {
-	allTasks := []*Config{}
-	for _, v := range ts.Data {
-		allTasks = append(allTasks, v...)
-	}
-
-	renderJSON(w, allTasks)
-}
-
-//Get/{id}/{version}
-func (ts *Service) getConfigHandler(w http.ResponseWriter, req *http.Request) {
+//Delete/{id}
+func (ts *Service) deleteGroupConfigHandler(w http.ResponseWriter, req *http.Request) {
 	id := mux.Vars(req)["id"]
-	task, ok := ts.Data[id]
-	if !ok {
+	if value, ok := ts.Data[id]; ok && len(value) > 1 {
+		delete(ts.Data, id)
+		renderJSON(w, value)
+	} else {
 		err := errors.New("key not found")
 		http.Error(w, err.Error(), http.StatusNotFound)
-		return
 	}
-	renderJSON(w, task)
 }
-
-//Get/{version}        TEST
-/*func (ts *Service) getConfigVersionHandler(w http.ResponseWriter, req *http.Request) {
-	version := mux.Vars(req)["version"]
-	task, ok := ts.Data[version]
-	if !ok {
-		err := errors.New("key not found")
-		http.Error(w, err.Error(), http.StatusNotFound)
-		return
-	}
-	renderJSON(w, task)
-}*/
 
 //Delete/{id}
-func (ts *Service) delConfigHandler(w http.ResponseWriter, req *http.Request) {
+func (ts *Service) deleteSingleConfigHandler(w http.ResponseWriter, req *http.Request) {
 	id := mux.Vars(req)["id"]
-	if v, ok := ts.Data[id]; ok {
+	if value, ok := ts.Data[id]; ok && len(value) == 1 {
 		delete(ts.Data, id)
-		renderJSON(w, v)
+		renderJSON(w, value)
 	} else {
 		err := errors.New("key not found")
 		http.Error(w, err.Error(), http.StatusNotFound)
