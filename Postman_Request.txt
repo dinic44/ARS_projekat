@@ -12,31 +12,27 @@ POST Config
 localhost:8000/config
 
 Single
-[
-    {
-   "entries": {
-         "Name": "name",
-         "LastName": "last"
-     },
-     "version": "v1"
-    }
-]
+{
+        "version": "v1",
+        "entries": {
+            "name": "name",
+            "last": "last"
+        }
+}
 
 Group
 [
     {
-       "entries":
-       {
-            "Name": "name1",
-            "LastName": "last1"
+        "entries": {
+            "last": "last",
+            "name": "name"
         },
         "version": "v1"
     },
-        {
-       "entries":
-       {
-            "Name": "name2",
-            "LastName": "last2"
+    {
+        "entries": {
+            "last": "last2",
+            "name": "name2"
         },
         "version": "v2"
     }

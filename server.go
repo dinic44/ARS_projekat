@@ -30,15 +30,16 @@ func (ts *Service) createSingleConfigHandler(w http.ResponseWriter, req *http.Re
 	}
 
 	rt, err := decodeBody(req.Body)
-	if err != nil || len(rt) > 1 {
+	if err != nil /*|| len(rt) > 1*/ {
 		http.Error(w, "Invalid Format is > 1", http.StatusBadRequest)
 		return
 	}
 
 	id := createId()
-	ts.Data[id] = rt
-	renderJSON(w, rt)
-	w.Write([]byte(id))
+	var ConfigList []*Config
+	ConfigList = append(ConfigList, rt)
+	ts.Data[id] = ConfigList
+	renderJSON(w, ts.Data)
 }
 
 //Create Group
@@ -57,15 +58,16 @@ func (ts *Service) createGroupConfigHandler(w http.ResponseWriter, req *http.Req
 	}
 
 	rt, err := decodeBody(req.Body)
-	if err != nil || len(rt) == 1 {
+	if err != nil /*|| len(rt) == 1*/ {
 		http.Error(w, "Invalid Format is == 1", http.StatusBadRequest)
 		return
 	}
 
 	id := createId()
-	ts.Data[id] = rt
-	renderJSON(w, rt)
-	w.Write([]byte(id))
+	var ConfigList []*Config
+	ConfigList = append(ConfigList, rt)
+	ts.Data[id] = ConfigList
+	renderJSON(w, ts.Data)
 }
 
 //Get All Single
@@ -101,6 +103,17 @@ func (ts *Service) getSingleConfigHandler(w http.ResponseWriter, req *http.Reque
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
+	version := mux.Vars(req)["version"]
+	allTasks := []*Config{}
+	for _, v := range task {
+		if v.Version == version {
+			allTasks = append(allTasks, v)
+			renderJSON(w, allTasks)
+
+		}
+
+	}
+
 	renderJSON(w, task)
 }
 
@@ -116,15 +129,47 @@ func (ts *Service) getGroupConfigHandler(w http.ResponseWriter, req *http.Reques
 	renderJSON(w, task)
 }
 
-//Delete/{id} Group
-func (ts *Service) deleteGroupConfigHandler(w http.ResponseWriter, req *http.Request) {
-	id := mux.Vars(req)["id"]
-	if value, ok := ts.Data[id]; ok && len(value) > 1 {
-		delete(ts.Data, id)
-		renderJSON(w, value)
-	} else {
+//Get/{id}/{version} Single
+func (ts *Service) getSingleVersionConfigHandler(w http.ResponseWriter, r *http.Request) {
+	val := mux.Vars(r)
+
+	id := val["id"]
+	task, ok := ts.Data[id]
+	if !ok {
 		err := errors.New("key not found")
 		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	version := val["version"]
+	allTasks := []*Config{}
+	for _, v := range task {
+		if v.Version == version {
+			allTasks = append(allTasks, v)
+			renderJSON(w, allTasks)
+		}
+	}
+}
+
+//Get/{id}/{version} Group
+func (ts *Service) getGroupVersionConfigHandler(w http.ResponseWriter, r *http.Request) {
+	val := mux.Vars(r)
+
+	id := val["id"]
+	task, ok := ts.Data[id]
+	if !ok {
+		err := errors.New("key not found")
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+	version := val["version"]
+	allTasks := []*Config{}
+	for _, v := range task {
+		if v.Version == version {
+			allTasks = append(allTasks, v)
+			renderJSON(w, allTasks)
+
+		}
 	}
 }
 
@@ -138,6 +183,41 @@ func (ts *Service) deleteSingleConfigHandler(w http.ResponseWriter, req *http.Re
 		err := errors.New("key not found")
 		http.Error(w, err.Error(), http.StatusNotFound)
 	}
+}
+
+//Delete/{id} Group
+func (ts *Service) deleteGroupConfigHandler(w http.ResponseWriter, req *http.Request) {
+	id := mux.Vars(req)["id"]
+	if value, ok := ts.Data[id]; ok && len(value) > 1 {
+		delete(ts.Data, id)
+		renderJSON(w, value)
+	} else {
+		err := errors.New("key not found")
+		http.Error(w, err.Error(), http.StatusNotFound)
+	}
+}
+
+//Delete/{id}/{version}
+func (ts *Service) deleteSingleVersionConfigHandler(w http.ResponseWriter, r *http.Request) {
+	val := mux.Vars(r)
+	id := val["id"]
+	task, ok := ts.Data[id]
+	if !ok {
+		err := errors.New("key not found")
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	version := val["version"]
+	for number, v := range task {
+		if v.Version == version {
+			task = append(task[:number], task[number+1:]...)
+			ts.Data[id] = task
+			break
+		}
+	}
+	renderJSON(w, ts.Data)
+
 }
 
 //Put/{id}
@@ -157,20 +237,14 @@ func (ts *Service) updateConfigHandler(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	id := mux.Vars(req)["id"]
-	task, err2 := ts.Data[id]
-	if !err2 {
-		err2 := errors.New("key not found")
-		http.Error(w, err2.Error(), http.StatusNotFound)
-		return
-	}
+	val := mux.Vars(req)
+	id := val["id"]
 
-	for _, config := range rt {
-		task = append(task, config)
-	}
+	addConfig := ts.Data[id]
+	addConfig = append(addConfig, rt)
+	ts.Data[id] = addConfig
 
-	ts.Data[id] = task
-	renderJSON(w, task)
+	renderJSON(w, ts.Data)
 }
 
 func renderJSON(w http.ResponseWriter, v interface{}) {
@@ -184,7 +258,19 @@ func renderJSON(w http.ResponseWriter, v interface{}) {
 	w.Write(js)
 }
 
-func decodeBody(r io.Reader) ([]*Config, error) {
+func decodeBody(r io.Reader) (*Config, error) {
+	dec := json.NewDecoder(r)
+	dec.DisallowUnknownFields()
+
+	var rt Config
+
+	if err := dec.Decode(&rt); err != nil {
+		return nil, err
+	}
+	return &rt, nil
+}
+
+func decodeBodyGroup(r io.Reader) ([]*Config, error) {
 	dec := json.NewDecoder(r)
 	dec.DisallowUnknownFields()
 

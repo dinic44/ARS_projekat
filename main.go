@@ -26,14 +26,18 @@ func main() {
 
 	router.HandleFunc("/config", server.getAllSingleConfigHandler).Methods("GET") //All Single
 	router.HandleFunc("/configs", server.getAllGroupConfigHandler).Methods("GET") //All Group
-	
+
 	router.HandleFunc("/config/{id}", server.getSingleConfigHandler).Methods("GET") //Find One Single {id}
 	router.HandleFunc("/configs/{id}", server.getGroupConfigHandler).Methods("GET") //Find One Group {id}
 
 	router.HandleFunc("/config/{id}", server.deleteSingleConfigHandler).Methods("DELETE") //Delete Single {id}
 	router.HandleFunc("/configs/{id}", server.deleteGroupConfigHandler).Methods("DELETE") //Delete Group {id}
 
-	router.HandleFunc("/config/{id}", server.updateConfigHandler).Methods("PUT") //Update
+	router.HandleFunc("/config/{id}", server.updateConfigHandler).Methods("PUT") //Update /{id}/
+
+	router.HandleFunc("/config/{id}/{version}", server.getSingleVersionConfigHandler).Methods("GET")       //Find One Single {id}/{version}
+	router.HandleFunc("/configs/{id}/{version}", server.getGroupVersionConfigHandler).Methods("GET")       //Find One Group {id}/{version}
+	router.HandleFunc("/config/{id}/{version}", server.deleteSingleVersionConfigHandler).Methods("DELETE") //Delete Single {id}/{version}
 
 	srv := &http.Server{Addr: "0.0.0.0:8000", Handler: router}
 	go func() {
