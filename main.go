@@ -26,7 +26,7 @@ func main() {
 
 	router.HandleFunc("/config", server.getAllSingleConfigHandler).Methods("GET") //All Single
 	router.HandleFunc("/configs", server.getAllGroupConfigHandler).Methods("GET") //All Group
-
+	
 	router.HandleFunc("/config/{id}", server.getSingleConfigHandler).Methods("GET") //Find One Single {id}
 	router.HandleFunc("/configs/{id}", server.getGroupConfigHandler).Methods("GET") //Find One Group {id}
 

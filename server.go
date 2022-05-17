@@ -116,6 +116,30 @@ func (ts *Service) getGroupConfigHandler(w http.ResponseWriter, req *http.Reques
 	renderJSON(w, task)
 }
 
+//Delete/{id} Group
+func (ts *Service) deleteGroupConfigHandler(w http.ResponseWriter, req *http.Request) {
+	id := mux.Vars(req)["id"]
+	if value, ok := ts.Data[id]; ok && len(value) > 1 {
+		delete(ts.Data, id)
+		renderJSON(w, value)
+	} else {
+		err := errors.New("key not found")
+		http.Error(w, err.Error(), http.StatusNotFound)
+	}
+}
+
+//Delete/{id} Single
+func (ts *Service) deleteSingleConfigHandler(w http.ResponseWriter, req *http.Request) {
+	id := mux.Vars(req)["id"]
+	if value, ok := ts.Data[id]; ok && len(value) == 1 {
+		delete(ts.Data, id)
+		renderJSON(w, value)
+	} else {
+		err := errors.New("key not found")
+		http.Error(w, err.Error(), http.StatusNotFound)
+	}
+}
+
 //Put/{id}
 func (ts *Service) updateConfigHandler(w http.ResponseWriter, req *http.Request) {
 	contentType := req.Header.Get("Content-Type")
@@ -147,30 +171,6 @@ func (ts *Service) updateConfigHandler(w http.ResponseWriter, req *http.Request)
 
 	ts.Data[id] = task
 	renderJSON(w, task)
-}
-
-//Delete/{id}
-func (ts *Service) deleteGroupConfigHandler(w http.ResponseWriter, req *http.Request) {
-	id := mux.Vars(req)["id"]
-	if value, ok := ts.Data[id]; ok && len(value) > 1 {
-		delete(ts.Data, id)
-		renderJSON(w, value)
-	} else {
-		err := errors.New("key not found")
-		http.Error(w, err.Error(), http.StatusNotFound)
-	}
-}
-
-//Delete/{id}
-func (ts *Service) deleteSingleConfigHandler(w http.ResponseWriter, req *http.Request) {
-	id := mux.Vars(req)["id"]
-	if value, ok := ts.Data[id]; ok && len(value) == 1 {
-		delete(ts.Data, id)
-		renderJSON(w, value)
-	} else {
-		err := errors.New("key not found")
-		http.Error(w, err.Error(), http.StatusNotFound)
-	}
 }
 
 func renderJSON(w http.ResponseWriter, v interface{}) {
