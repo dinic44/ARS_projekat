@@ -1,6 +1,7 @@
 package main
 
 import (
+	cs "ARS_projekat/configstore"
 	"context"
 	"github.com/gorilla/mux"
 	"log"
@@ -18,8 +19,13 @@ func main() {
 	router := mux.NewRouter()
 	router.StrictSlash(true)
 
+	store, err := cs.New()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	server := Service{
-		Data: map[string][]*Config{},
+		store: store,
 	}
 	router.HandleFunc("/config", server.createSingleConfigHandler).Methods("POST") //Create Single
 	router.HandleFunc("/configs", server.createGroupConfigHandler).Methods("POST") //Create Group
