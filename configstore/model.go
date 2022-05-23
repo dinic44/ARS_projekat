@@ -18,9 +18,11 @@ type GroupConfig struct {
 }
 
 const (
-	singleConfigId      = "config/%s"
-	singleConfigVersion = "config/%s/%s"
+	singleConfigAll     = "singleConfigs"
+	singleConfigId      = "singleConfig/%s"
+	singleConfigVersion = "singleConfig/%s/%s"
 
+	groupConfigAll     = "groupConfigs"
 	groupConfigId      = "group/%s"
 	groupConfigVersion = "group/%s/%s"
 )

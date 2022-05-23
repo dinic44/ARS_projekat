@@ -28,9 +28,11 @@ func main() {
 		store: store,
 	}
 
-	router.HandleFunc("/config/", server.CreateSingleConfigHandler).Methods("POST")        //Create Single Config
-	router.HandleFunc("/config/{id}/{ver}", server.FindSingleConfigHandler).Methods("GET") //Find Single Config
-	
+	router.HandleFunc("/singleConfig/", server.CreateSingleConfigHandler).Methods("POST")            //Create Single
+	router.HandleFunc("/singleConfig/{id}/", server.GetSingleConfigVersionHandler).Methods("GET")    //Find One Single{id}
+	router.HandleFunc("/singleConfig/{id}/{version}", server.FindSingleConfigHandler).Methods("GET") //Find One Single{id}/{version}
+	router.HandleFunc("/singleConfigs/", server.GetAllSingleConfigHandler).Methods("GET")            //Find All Single
+
 	srv := &http.Server{Addr: "0.0.0.0:8000", Handler: router}
 	go func() {
 		log.Println("Server Starting-----")

@@ -32,7 +32,7 @@ func New() (*ConfigStore, error) {
 func (cs *ConfigStore) CreateSingleConfig(singleConfig *SingleConfig) (*SingleConfig, error) {
 	kv := cs.cli.KV()
 
-	sid, rid := generateSingleConfigKey(singleConfig.Version)
+	sid, rid := generateSingleConfigKey(singleConfig.Id)
 	singleConfig.Id = rid
 
 	data, err := json.Marshal(singleConfig)
@@ -49,7 +49,32 @@ func (cs *ConfigStore) CreateSingleConfig(singleConfig *SingleConfig) (*SingleCo
 	return singleConfig, nil
 }
 
-//Find Single
+//Find One Single/{id}
+func (cs *ConfigStore) FindSingleConfigVersion(id string) ([]*SingleConfig, error) {
+	kv := cs.cli.KV()
+
+	key := constructSingleConfigIdKey(id)
+	data, _, err := kv.List(key, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var singleConfigs []*SingleConfig
+
+	for _, pair := range data {
+		singleConfig := &SingleConfig{}
+		err := json.Unmarshal(pair.Value, singleConfig)
+		if err != nil {
+			return nil, err
+		}
+
+		singleConfigs = append(singleConfigs, singleConfig)
+	}
+
+	return singleConfigs, nil
+}
+
+//Find One Single/{id}/{version}
 func (cs *ConfigStore) FindSingleConfig(id string, version string) (*SingleConfig, error) {
 	kv := cs.cli.KV()
 	key := constructSingleConfigKey(id, version)
@@ -66,6 +91,27 @@ func (cs *ConfigStore) FindSingleConfig(id string, version string) (*SingleConfi
 	}
 
 	return singleConfig, nil
+}
+
+//Find All Single
+func (cs *ConfigStore) GetAllSingleConfig() ([]*SingleConfig, error) {
+	kv := cs.cli.KV()
+	data, _, err := kv.List(singleConfigAll, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	singleConfigs := []*SingleConfig{}
+	for _, pair := range data {
+		singleConfig := &SingleConfig{}
+		err = json.Unmarshal(pair.Value, singleConfig)
+		if err != nil {
+			return nil, err
+		}
+		singleConfigs = append(singleConfigs, singleConfig)
+	}
+
+	return singleConfigs, nil
 }
 
 //Create Group
