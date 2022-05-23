@@ -5,22 +5,48 @@ import (
 	"github.com/google/uuid"
 )
 
-type Config struct {
+type SingleConfig struct {
 	Id      string            `json:"id"`
 	Entries map[string]string `json:"entries"`
 	Version string            `json:"version"`
 }
 
-const (
-	posts = "posts/%s"
-	all   = "posts"
-)
-
-func generateKey() (string, string) {
-	id := uuid.New().String()
-	return fmt.Sprintf(posts, id), id
+type GroupConfig struct {
+	Id          string              `json:"id"`
+	GroupConfig []map[string]string `json:"configs"`
+	Version     string              `json:"version"`
 }
 
-func constructKey(id string) string {
-	return fmt.Sprintf(posts, id)
+const (
+	singleConfigId      = "config/%s"
+	singleConfigVersion = "config/%s/%s"
+
+	groupConfigId      = "group/%s"
+	groupConfigVersion = "group/%s/%s"
+)
+
+func generateSingleConfigKey(ver string) (string, string) {
+	id := uuid.New().String()
+	return fmt.Sprintf(singleConfigVersion, id, ver), id
+}
+
+func constructSingleConfigKey(id string, ver string) string {
+	return fmt.Sprintf(singleConfigVersion, id, ver)
+}
+
+func constructSingleConfigIdKey(id string) string {
+	return fmt.Sprintf(singleConfigId, id)
+}
+
+func generateGroupConfigKey(ver string) (string, string) {
+	id := uuid.New().String()
+	return fmt.Sprintf(groupConfigVersion, id, ver), id
+}
+
+func constructGroupConfigKey(id string, ver string) string {
+	return fmt.Sprintf(groupConfigVersion, id, ver)
+}
+
+func constructGroupConfigIdKey(id string) string {
+	return fmt.Sprintf(groupConfigId, id)
 }

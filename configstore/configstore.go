@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/hashicorp/consul/api"
+	"log"
 	"os"
 )
 
@@ -27,69 +28,70 @@ func New() (*ConfigStore, error) {
 	}, nil
 }
 
-func (cs *ConfigStore) Get(id string) (*Config, error) {
+//Create Single
+func (cs *ConfigStore) CreateSingleConfig(singleConfig *SingleConfig) (*SingleConfig, error) {
 	kv := cs.cli.KV()
 
-	pair, _, err := kv.Get(constructKey(id), nil)
+	sid, rid := generateSingleConfigKey(singleConfig.Version)
+	singleConfig.Id = rid
+
+	data, err := json.Marshal(singleConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	post := &Config{}
-	err = json.Unmarshal(pair.Value, post)
+	c := &api.KVPair{Key: sid, Value: data}
+	_, err = kv.Put(c, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	return post, nil
+	return singleConfig, nil
 }
 
-func (cs *ConfigStore) GetAll() ([]*Config, error) {
+//Find Single
+func (cs *ConfigStore) FindSingleConfig(id string, version string) (*SingleConfig, error) {
 	kv := cs.cli.KV()
-	data, _, err := kv.List(all, nil)
+	key := constructSingleConfigKey(id, version)
+	data, _, err := kv.Get(key, nil)
+
+	if err != nil || data == nil {
+		return nil, err
+	}
+
+	singleConfig := &SingleConfig{}
+	err = json.Unmarshal(data.Value, singleConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	posts := []*Config{}
-	for _, pair := range data {
-		post := &Config{}
-		err = json.Unmarshal(pair.Value, post)
-		if err != nil {
-			return nil, err
-		}
-		posts = append(posts, post)
-	}
-
-	return posts, nil
+	return singleConfig, nil
 }
 
-func (cs *ConfigStore) Delete(id string) (map[string]string, error) {
-	kv := cs.cli.KV()
-	_, err := kv.Delete(constructKey(id), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return map[string]string{"Deleted": id}, nil
-}
-
-func (cs *ConfigStore) Post(post *Config) (*Config, error) {
+//Create Group
+func (cs *ConfigStore) CreateGroupConfig(groupConfig *GroupConfig) (*GroupConfig, error) {
 	kv := cs.cli.KV()
 
-	sid, rid := generateKey()
-	post.Id = rid
+	sid, rid := generateGroupConfigKey(groupConfig.Version)
+	groupConfig.Id = rid
 
-	data, err := json.Marshal(post)
+	log.Default().Println(sid, kv)
+
+	data, err := json.Marshal(groupConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	p := &api.KVPair{Key: sid, Value: data}
-	_, err = kv.Put(p, nil)
+	g := &api.KVPair{Key: sid, Value: data}
+	_, err = kv.Put(g, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	return post, nil
+	/*for i, config := range group.Configs {
+		cid := constructGroupLabel(rid, group.Version, i, config)
+		log.Default().Println(cid)
+	}*/
+
+	return groupConfig, nil
 }

@@ -4,6 +4,7 @@ import (
 	cs "ARS_projekat/configstore"
 	"errors"
 	"github.com/gorilla/mux"
+	"log"
 	"mime"
 	"net/http"
 )
@@ -12,7 +13,8 @@ type Service struct {
 	store *cs.ConfigStore
 }
 
-func (ts *Service) createPostHandler(w http.ResponseWriter, req *http.Request) {
+//Create Single Config
+func (ts *Service) CreateSingleConfigHandler(w http.ResponseWriter, req *http.Request) {
 	contentType := req.Header.Get("Content-Type")
 	mediatype, _, err := mime.ParseMediaType(contentType)
 	if err != nil {
@@ -26,45 +28,25 @@ func (ts *Service) createPostHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	rt, err := decodeBody(req.Body)
+	rt, err := decodeBodySingle(req.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	post, err := ts.store.Post(rt)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	renderJSON(w, post)
+	singleConfig, err := ts.store.CreateSingleConfig(rt)
+	log.Default().Println(singleConfig)
+	w.Write([]byte(singleConfig.Id))
 }
 
-func (ts *Service) getAllHandler(w http.ResponseWriter, req *http.Request) {
-	allTasks, err := ts.store.GetAll()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	renderJSON(w, allTasks)
-}
-
-func (ts *Service) getPostHandler(w http.ResponseWriter, req *http.Request) {
+func (ts *Service) FindSingleConfigHandler(w http.ResponseWriter, req *http.Request) {
+	ver := mux.Vars(req)["ver"]
 	id := mux.Vars(req)["id"]
-	task, err := ts.store.Get(id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	task, ok := ts.store.FindSingleConfig(id, ver)
+	if ok != nil {
+		err := errors.New("not found")
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 	renderJSON(w, task)
-}
-
-func (ts *Service) delPostHandler(w http.ResponseWriter, req *http.Request) {
-	id := mux.Vars(req)["id"]
-	msg, err := ts.store.Delete(id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	renderJSON(w, msg)
 }
