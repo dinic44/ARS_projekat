@@ -11,11 +11,11 @@ func decodeBodySingle(r io.Reader) (*cs.SingleConfig, error) {
 	dec := json.NewDecoder(r)
 	dec.DisallowUnknownFields()
 
-	var rt *cs.SingleConfig
-	if err := dec.Decode(&rt); err != nil {
+	var singleConfig *cs.SingleConfig
+	if err := dec.Decode(&singleConfig); err != nil {
 		return nil, err
 	}
-	return rt, nil
+	return singleConfig, nil
 }
 
 func decodeBodyGroup(r io.Reader) (*cs.GroupConfig, error) {

@@ -2,9 +2,9 @@ package configstore
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/hashicorp/consul/api"
-	"log"
 	"os"
 )
 
@@ -32,7 +32,7 @@ func New() (*ConfigStore, error) {
 func (cs *ConfigStore) CreateSingleConfig(singleConfig *SingleConfig) (*SingleConfig, error) {
 	kv := cs.cli.KV()
 
-	sid, rid := generateSingleConfigKey(singleConfig.Id)
+	sid, rid := generateSingleConfigKey(singleConfig.Version)
 	singleConfig.Id = rid
 
 	data, err := json.Marshal(singleConfig)
@@ -47,6 +47,30 @@ func (cs *ConfigStore) CreateSingleConfig(singleConfig *SingleConfig) (*SingleCo
 	}
 
 	return singleConfig, nil
+}
+
+//Put New {id}
+func (cs *ConfigStore) PutNewSingleConfigVersion(singleConfig *SingleConfig) (*SingleConfig, error) {
+	kv := cs.cli.KV()
+
+	data, err := json.Marshal(singleConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = cs.FindSingleConfig(singleConfig.Id, singleConfig.Version)
+
+	if err == nil {
+		return nil, errors.New("error! ")
+	}
+
+	c := &api.KVPair{Key: constructSingleConfigKey(singleConfig.Id, singleConfig.Version), Value: data}
+	_, err = kv.Put(c, nil)
+	if err != nil {
+		return nil, err
+	}
+	return singleConfig, nil
+
 }
 
 //Find One Single/{id}
@@ -75,13 +99,13 @@ func (cs *ConfigStore) FindSingleConfigVersion(id string) ([]*SingleConfig, erro
 }
 
 //Find One Single/{id}/{version}
-func (cs *ConfigStore) FindSingleConfig(id string, version string) (*SingleConfig, error) {
+func (cs *ConfigStore) FindSingleConfig(id string, ver string) (*SingleConfig, error) {
 	kv := cs.cli.KV()
-	key := constructSingleConfigKey(id, version)
+	key := constructSingleConfigKey(id, ver)
 	data, _, err := kv.Get(key, nil)
 
 	if err != nil || data == nil {
-		return nil, err
+		return nil, errors.New("Cannot Find")
 	}
 
 	singleConfig := &SingleConfig{}
@@ -94,7 +118,7 @@ func (cs *ConfigStore) FindSingleConfig(id string, version string) (*SingleConfi
 }
 
 //Find All Single
-func (cs *ConfigStore) GetAllSingleConfig() ([]*SingleConfig, error) {
+/*func (cs *ConfigStore) GetAllSingleConfig() ([]*SingleConfig, error) {
 	kv := cs.cli.KV()
 	data, _, err := kv.List(singleConfigAll, nil)
 	if err != nil {
@@ -112,32 +136,15 @@ func (cs *ConfigStore) GetAllSingleConfig() ([]*SingleConfig, error) {
 	}
 
 	return singleConfigs, nil
-}
+}*/
 
-//Create Group
-func (cs *ConfigStore) CreateGroupConfig(groupConfig *GroupConfig) (*GroupConfig, error) {
+//Delete Single
+func (cs *ConfigStore) DeleteSingleConfig(id, version string) (map[string]string, error) {
 	kv := cs.cli.KV()
-
-	sid, rid := generateGroupConfigKey(groupConfig.Version)
-	groupConfig.Id = rid
-
-	log.Default().Println(sid, kv)
-
-	data, err := json.Marshal(groupConfig)
+	_, err := kv.Delete(constructSingleConfigKey(id, version), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	g := &api.KVPair{Key: sid, Value: data}
-	_, err = kv.Put(g, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	/*for i, config := range group.Configs {
-		cid := constructGroupLabel(rid, group.Version, i, config)
-		log.Default().Println(cid)
-	}*/
-
-	return groupConfig, nil
+	return map[string]string{"Deleted": id}, nil
 }

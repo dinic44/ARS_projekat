@@ -7,8 +7,8 @@ import (
 
 type SingleConfig struct {
 	Id      string            `json:"id"`
-	Entries map[string]string `json:"entries"`
 	Version string            `json:"version"`
+	Entries map[string]string `json:"entries"`
 }
 
 type GroupConfig struct {
@@ -18,29 +18,29 @@ type GroupConfig struct {
 }
 
 const (
-	singleConfigAll     = "singleConfigs"
-	singleConfigId      = "singleConfig/%s"
-	singleConfigVersion = "singleConfig/%s/%s"
+	singleConfigId  = "singleConfig/%s"
+	singleConfig    = "singleConfig/%s/%s"
+	singleConfigAll = "singleConfigs"
 
-	groupConfigAll     = "groupConfigs"
-	groupConfigId      = "group/%s"
-	groupConfigVersion = "group/%s/%s"
+	/*groupConfigAll     = "groupConfigs"
+	groupConfigId      = "groupConfig/%s"
+	groupConfig 	   = "groupConfig/%s/%s"*/
 )
 
 func generateSingleConfigKey(ver string) (string, string) {
 	id := uuid.New().String()
-	return fmt.Sprintf(singleConfigVersion, id, ver), id
+	return fmt.Sprintf(singleConfig, id, ver), id
 }
 
 func constructSingleConfigKey(id string, ver string) string {
-	return fmt.Sprintf(singleConfigVersion, id, ver)
+	return fmt.Sprintf(singleConfig, id, ver)
 }
 
 func constructSingleConfigIdKey(id string) string {
 	return fmt.Sprintf(singleConfigId, id)
 }
 
-func generateGroupConfigKey(ver string) (string, string) {
+/*func generateGroupConfigKey(ver string) (string, string) {
 	id := uuid.New().String()
 	return fmt.Sprintf(groupConfigVersion, id, ver), id
 }
@@ -51,4 +51,4 @@ func constructGroupConfigKey(id string, ver string) string {
 
 func constructGroupConfigIdKey(id string) string {
 	return fmt.Sprintf(groupConfigId, id)
-}
+}*/
