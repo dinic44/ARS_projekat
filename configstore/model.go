@@ -1,8 +1,13 @@
 package configstore
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/hashicorp/consul/api"
+	"log"
+	"sort"
 )
 
 type SingleConfig struct {
@@ -22,9 +27,9 @@ const (
 	singleConfig    = "singleConfig/%s/%s"
 	singleConfigAll = "singleConfigs"
 
+	groupConfigAll     = "groupConfigs"
 	groupConfigId      = "groupConfig/%s"
 	groupConfigVersion = "groupConfig/%s/%s"
-	groupConfigAll     = "groupConfigs"
 	singleInGroup      = "groupConfig/%s/%s/%s"
 	groupConfigLabel   = "groupConfig/%s/%s/%s/%s" //??
 )
@@ -55,7 +60,7 @@ func constructGroupConfigIdKey(id string) string {
 	return fmt.Sprintf(groupConfigId, id)
 }
 
-/*func (cs *ConfigStore) CreateLabels(configs []map[string]string, id, ver string) error {
+func (cs *ConfigStore) CreateLabels(configs []map[string]string, id, ver string) error {
 	kv := cs.cli.KV()
 	if keys, _, err := kv.Get(constructGroupConfigKey(id, ver), nil); err != nil || keys == nil {
 		return errors.New("Group doesn't exists")
@@ -77,9 +82,9 @@ func constructGroupConfigIdKey(id string) string {
 		}
 	}
 	return nil
-}*/
+}
 
-/*func constructGroupLabel(id, ver, index string, config map[string]string) string {
+func constructGroupLabel(id, ver, index string, config map[string]string) string {
 	keys := make([]string, 0, len(config))
 	for k := range config {
 		keys = append(keys, k)
@@ -93,5 +98,5 @@ func constructGroupConfigIdKey(id string) string {
 		kvpairs = kvpairs + fmt.Sprintf("%s=%s", keys[k], config[keys[k]]+"&")
 	}
 	kvpairs = kvpairs[:len(kvpairs)-1]
-	return fmt.Sprintf(groupWithLabel, id, ver, kvpairs, index)
-}*/
+	return fmt.Sprintf(groupConfigLabel, id, ver, kvpairs, index)
+}

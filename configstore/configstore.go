@@ -158,7 +158,7 @@ func (cs *ConfigStore) CreateGroupConfig(groupConfig *GroupConfig) (*GroupConfig
 	groupConfig.Id = rid
 
 	data, err := json.Marshal(groupConfig)
-	if err != nil {
+	if err != nil || groupConfig.Version == "" {
 		return nil, err
 	}
 
@@ -168,10 +168,10 @@ func (cs *ConfigStore) CreateGroupConfig(groupConfig *GroupConfig) (*GroupConfig
 		return nil, err
 	}
 
-	/*err = cs.CreateLabelGroup(groupConfig.GroupConfig, groupConfig.Id, groupConfig.Version)
+	err = cs.CreateLabels(groupConfig.GroupConfig, groupConfig.Id, groupConfig.Version)
 	if err != nil {
 		return nil, err
-	}*/
+	}
 
 	return groupConfig, nil
 }
