@@ -22,11 +22,11 @@ func decodeBodyGroup(r io.Reader) (*cs.GroupConfig, error) {
 	dec := json.NewDecoder(r)
 	dec.DisallowUnknownFields()
 
-	var group *cs.GroupConfig
-	if err := dec.Decode(&group); err != nil {
+	var groupConfig *cs.GroupConfig
+	if err := dec.Decode(&groupConfig); err != nil {
 		return nil, err
 	}
-	return group, nil
+	return groupConfig, nil
 }
 
 func renderJSON(w http.ResponseWriter, v interface{}) {

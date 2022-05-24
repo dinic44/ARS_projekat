@@ -13,30 +13,27 @@ localhost:8000/config
 
 Single
 {
-        "version": "v1",
-        "entries": {
-            "name": "name",
-            "last": "last"
-        }
+    "version": "v2",
+    "entries": {
+        "name": "name2",
+        "last": "last2"
+    }
 }
 
 Group
-[
-    {
-        "entries": {
-            "last": "last",
-            "name": "name"
+{
+    "version": "v2",
+    "configs": [
+        {
+            "name": "name1",
+            "last": "last1"
         },
-        "version": "v1"
-    },
-    {
-        "entries": {
-            "last": "last2",
-            "name": "name2"
-        },
-        "version": "v2"
-    }
-]
+        {
+            "name": "name2",
+            "last": "last2"
+        }
+    ]
+}
 
 -----------------------------
 

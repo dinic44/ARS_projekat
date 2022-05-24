@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/mux"
 	"mime"
 	"net/http"
+	"net/url"
 )
 
 type Service struct {
@@ -96,16 +97,6 @@ func (ts *Service) FindSingleConfigHandler(w http.ResponseWriter, req *http.Requ
 	renderJSON(w, task)
 }
 
-//Find All Single
-/*func (ts *Service) GetAllSingleConfigHandler(w http.ResponseWriter, req *http.Request) {
-	allTasks, err := ts.store.GetAllSingleConfig()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	renderJSON(w, allTasks)
-}*/
-
 //Delete Single
 func (ts *Service) DeleteSingleConfigHandler(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
@@ -113,5 +104,103 @@ func (ts *Service) DeleteSingleConfigHandler(w http.ResponseWriter, r *http.Requ
 	_, err := ts.store.DeleteSingleConfig(id, ver)
 	if err != nil {
 		http.Error(w, "error", http.StatusBadRequest)
+	}
+}
+
+//Create Group
+func (ts *Service) CreateGroupConfigHandler(w http.ResponseWriter, req *http.Request) {
+	contentType := req.Header.Get("Content-Type")
+	mediatype, _, err := mime.ParseMediaType(contentType)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if mediatype != "application/json" {
+		err := errors.New("Expect application/json Content-Type")
+		http.Error(w, err.Error(), http.StatusUnsupportedMediaType)
+		return
+	}
+
+	rt, err := decodeBodyGroup(req.Body)
+	if err != nil || rt.Version == "" || rt.GroupConfig == nil {
+		http.Error(w, "Invalid JSON format", http.StatusBadRequest)
+		return
+	}
+
+	groupConfig, err := ts.store.CreateGroupConfig(rt)
+
+	w.Write([]byte(groupConfig.Id))
+}
+
+//Put new{id}
+func (ts *Service) PutNewGroupConfigVersionHandler(w http.ResponseWriter, req *http.Request) {
+	contentType := req.Header.Get("Content-Type")
+	mediatype, _, err := mime.ParseMediaType(contentType)
+	id := mux.Vars(req)["id"]
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if mediatype != "application/json" {
+		err := errors.New("Expect application/json Content-Type")
+		http.Error(w, err.Error(), http.StatusUnsupportedMediaType)
+		return
+	}
+
+	rt, err := decodeBodyGroup(req.Body)
+	if err != nil || rt.Version == "" || rt.GroupConfig == nil {
+		http.Error(w, "Invalid JSON format", http.StatusBadRequest)
+		return
+	}
+
+	rt.Id = id
+	groupConfig, err := ts.store.PutNewGroupConfigVersion(rt)
+
+	if err != nil {
+		http.Error(w, "already exists", http.StatusBadRequest)
+		return
+	}
+
+	w.Write([]byte(groupConfig.Id))
+}
+
+//Find One from Group {id}/{version}
+func (ts *Service) GetGroupConfigHandler(w http.ResponseWriter, req *http.Request) {
+	ver := mux.Vars(req)["ver"]
+	id := mux.Vars(req)["id"]
+
+	task, ok := ts.store.FindGroupConfig(id, ver)
+	if ok != nil {
+		err := errors.New("key not found")
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+	renderJSON(w, task)
+}
+
+//Find Single Key:Value from version of a group
+func (ts *Service) GetSingleConfigFromGroupConfigHandler(w http.ResponseWriter, req *http.Request) {
+	ver := mux.Vars(req)["ver"]
+	id := mux.Vars(req)["id"]
+
+	req.ParseForm()
+	params := url.Values.Encode(req.Form)
+	label, err := ts.store.FindSingleInGroup(id, ver, params)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+	renderJSON(w, label)
+}
+
+func (ts *Service) DeleteGroupConfigHandler(writer http.ResponseWriter, request *http.Request) {
+	id := mux.Vars(request)["id"]
+	ver := mux.Vars(request)["ver"]
+	err := ts.store.DeleteGroupConfig(id, ver)
+	if err != nil {
+		http.Error(writer, "error", http.StatusBadRequest)
 	}
 }
