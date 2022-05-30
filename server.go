@@ -29,7 +29,7 @@ func (ts *Service) CreateSingleConfigHandler(w http.ResponseWriter, req *http.Re
 	}
 
 	rt, err := decodeBodySingle(req.Body)
-	if err != nil {
+	if err != nil || rt.Version == "" || rt.Entries == nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -172,7 +172,7 @@ func (ts *Service) GetGroupConfigHandler(w http.ResponseWriter, req *http.Reques
 	ver := mux.Vars(req)["ver"]
 	id := mux.Vars(req)["id"]
 
-	task, ok := ts.store.FindGroupConfig(id, ver)
+	task, ok := ts.store.GetGroupConfig(id, ver)
 	if ok != nil {
 		err := errors.New("key not found")
 		http.Error(w, err.Error(), http.StatusNotFound)
@@ -196,6 +196,7 @@ func (ts *Service) GetSingleConfigFromGroupConfigHandler(w http.ResponseWriter, 
 	renderJSON(w, label)
 }
 
+//Delete {id}/{ver}
 func (ts *Service) DeleteGroupConfigHandler(writer http.ResponseWriter, request *http.Request) {
 	id := mux.Vars(request)["id"]
 	ver := mux.Vars(request)["ver"]

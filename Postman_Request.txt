@@ -21,8 +21,9 @@ Single
 }
 
 Group
+FIRST EXAMPLE
 {
-    "version": "v2",
+    "version": "v1",
     "configs": [
         {
             "name": "name1",
@@ -31,6 +32,21 @@ Group
         {
             "name": "name2",
             "last": "last2"
+        }
+    ]
+}
+
+SECOND EXAMPLE
+{
+    "version": "v2",
+    "configs": [
+        {
+            "name": "name3",
+            "last": "last3"
+        },
+        {
+            "name": "name4",
+            "last": "last4"
         }
     ]
 }

@@ -31,7 +31,7 @@ const (
 	groupConfigId      = "groupConfig/%s"
 	groupConfigVersion = "groupConfig/%s/%s"
 	singleInGroup      = "groupConfig/%s/%s/%s"
-	groupConfigLabel   = "groupConfig/%s/%s/%s/%s" //??
+	groupConfigLabel   = "groupConfig/%s/%s/%s/%s"
 )
 
 func generateSingleConfigKey(ver string) (string, string) {
@@ -56,21 +56,21 @@ func constructGroupConfigKey(id string, ver string) string {
 	return fmt.Sprintf(groupConfigVersion, id, ver)
 }
 
-func constructGroupConfigIdKey(id string) string {
+/*func constructGroupConfigIdKey(id string) string {
 	return fmt.Sprintf(groupConfigId, id)
-}
+}*/
 
 func (cs *ConfigStore) CreateLabels(configs []map[string]string, id, ver string) error {
 	kv := cs.cli.KV()
 	if keys, _, err := kv.Get(constructGroupConfigKey(id, ver), nil); err != nil || keys == nil {
-		return errors.New("Group doesn't exists")
+		return errors.New("error")
 	}
 
 	for _, config := range configs {
 		cid := constructGroupLabel(id, ver, uuid.New().String(), config)
 		cdata, err := json.Marshal(config)
 
-		log.Default().Printf("adding new config: %q. under key %q", config, cdata)
+		log.Default().Printf("adding new config", config, cdata)
 		if err != nil {
 			return err
 		}

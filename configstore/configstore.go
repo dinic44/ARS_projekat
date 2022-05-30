@@ -118,27 +118,6 @@ func (cs *ConfigStore) FindSingleConfig(id string, ver string) (*SingleConfig, e
 	return singleConfig, nil
 }
 
-//Find All Single
-/*func (cs *ConfigStore) GetAllSingleConfig() ([]*SingleConfig, error) {
-	kv := cs.cli.KV()
-	data, _, err := kv.List(singleConfigAll, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	singleConfigs := []*SingleConfig{}
-	for _, pair := range data {
-		singleConfig := &SingleConfig{}
-		err = json.Unmarshal(pair.Value, singleConfig)
-		if err != nil {
-			return nil, err
-		}
-		singleConfigs = append(singleConfigs, singleConfig)
-	}
-
-	return singleConfigs, nil
-}*/
-
 //Delete Single
 func (cs *ConfigStore) DeleteSingleConfig(id, version string) (map[string]string, error) {
 	kv := cs.cli.KV()
@@ -158,7 +137,7 @@ func (cs *ConfigStore) CreateGroupConfig(groupConfig *GroupConfig) (*GroupConfig
 	groupConfig.Id = rid
 
 	data, err := json.Marshal(groupConfig)
-	if err != nil || groupConfig.Version == "" {
+	if err != nil {
 		return nil, err
 	}
 
@@ -176,6 +155,7 @@ func (cs *ConfigStore) CreateGroupConfig(groupConfig *GroupConfig) (*GroupConfig
 	return groupConfig, nil
 }
 
+//Put New {id}
 func (cs *ConfigStore) PutNewGroupConfigVersion(groupConfig *GroupConfig) (*GroupConfig, error) {
 	kv := cs.cli.KV()
 
@@ -184,7 +164,7 @@ func (cs *ConfigStore) PutNewGroupConfigVersion(groupConfig *GroupConfig) (*Grou
 		return nil, err
 	}
 
-	_, err = cs.FindGroupConfig(groupConfig.Id, groupConfig.Version)
+	_, err = cs.GetGroupConfig(groupConfig.Id, groupConfig.Version)
 
 	if err == nil {
 		return nil, errors.New("already exists ")
@@ -196,10 +176,16 @@ func (cs *ConfigStore) PutNewGroupConfigVersion(groupConfig *GroupConfig) (*Grou
 		return nil, err
 	}
 
+	err = cs.CreateLabels(groupConfig.GroupConfig, groupConfig.Id, groupConfig.Version)
+	if err != nil {
+		return nil, err
+	}
+
 	return groupConfig, nil
 }
 
-func (cs *ConfigStore) FindGroupConfig(id string, ver string) (*GroupConfig, error) {
+//Find {id}/{ver}
+func (cs *ConfigStore) GetGroupConfig(id string, ver string) (*GroupConfig, error) {
 	kv := cs.cli.KV()
 	key := constructGroupConfigKey(id, ver)
 	data, _, err := kv.Get(key, nil)
