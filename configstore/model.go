@@ -23,12 +23,12 @@ type GroupConfig struct {
 }
 
 const (
-	singleConfigId  = "singleConfig/%s"
-	singleConfig    = "singleConfig/%s/%s"
-	singleConfigAll = "singleConfigs"
+	singleConfigId = "singleConfig/%s"
+	singleConfig   = "singleConfig/%s/%s"
+	/*	singleConfigAll = "singleConfigs"
 
-	groupConfigAll     = "groupConfigs"
-	groupConfigId      = "groupConfig/%s"
+		groupConfigAll     = "groupConfigs"
+		groupConfigId      = "groupConfig/%s"*/
 	groupConfigVersion = "groupConfig/%s/%s"
 	singleInGroup      = "groupConfig/%s/%s/%s"
 	groupConfigLabel   = "groupConfig/%s/%s/%s/%s"
@@ -55,10 +55,6 @@ func generateGroupConfigKey(ver string) (string, string) {
 func constructGroupConfigKey(id string, ver string) string {
 	return fmt.Sprintf(groupConfigVersion, id, ver)
 }
-
-/*func constructGroupConfigIdKey(id string) string {
-	return fmt.Sprintf(groupConfigId, id)
-}*/
 
 func (cs *ConfigStore) CreateLabels(configs []map[string]string, id, ver string) error {
 	kv := cs.cli.KV()
@@ -99,4 +95,11 @@ func constructGroupLabel(id, ver, index string, config map[string]string) string
 	}
 	kvpairs = kvpairs[:len(kvpairs)-1]
 	return fmt.Sprintf(groupConfigLabel, id, ver, kvpairs, index)
+}
+
+func generateRequestId() string {
+
+	rid := uuid.New().String()
+
+	return rid
 }

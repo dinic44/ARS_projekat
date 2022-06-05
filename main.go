@@ -28,17 +28,18 @@ func main() {
 		store: store,
 	}
 
-	router.HandleFunc("/singleConfig/", server.CreateSingleConfigHandler).Methods("POST")             //Create Single
-	router.HandleFunc("/singleConfig/{id}", server.PutNewSingleConfigVersionHandler).Methods("POST")  //Update Single
-	router.HandleFunc("/singleConfig/{id}", server.GetSingleConfigVersionHandler).Methods("GET")      //Find One Single{id}
-	router.HandleFunc("/singleConfig/{id}/{ver}", server.FindSingleConfigHandler).Methods("GET")      //Find One Single{id}/{version}
-	router.HandleFunc("/singleConfig/{id}/{ver}", server.DeleteSingleConfigHandler).Methods("DELETE") //Delete Single Version
+	router.HandleFunc("/singleConfig/", countPostSingleConfig(server.CreateSingleConfigHandler)).Methods("POST")               //Create Single
+	router.HandleFunc("/singleConfig/{id}", countPostSingleConfigVer(server.PutNewSingleConfigVersionHandler)).Methods("POST") //Update Single
+	router.HandleFunc("/singleConfig/{id}", countGetSingleConfigVer(server.GetSingleConfigVersionHandler)).Methods("GET")      //Find One Single{id}
+	router.HandleFunc("/singleConfig/{id}/{ver}", countGetSingleConfig(server.FindSingleConfigHandler)).Methods("GET")         //Find One Single{id}/{version}
+	router.HandleFunc("/singleConfig/{id}/{ver}", countDeleteSingleConfig(server.DeleteSingleConfigHandler)).Methods("DELETE") //Delete Single Version
 
-	router.HandleFunc("/groupConfig/", server.CreateGroupConfigHandler).Methods("POST")                                     //Create Group
-	router.HandleFunc("/groupConfig/{id}", server.PutNewGroupConfigVersionHandler).Methods("POST")                          //Update Group
-	router.HandleFunc("/groupConfig/{id}/{ver}", server.GetGroupConfigHandler).Methods("GET")                               //Find one Group{id}/{version}
-	router.HandleFunc("/groupConfig/{id}/{ver}/singleConfig/", server.GetSingleConfigFromGroupConfigHandler).Methods("GET") //Find one single inside of a group version
-	router.HandleFunc("/groupConfig/{id}/{ver}", server.DeleteGroupConfigHandler).Methods("DELETE")                         //Delete Group Version
+	router.HandleFunc("/groupConfig/", countPostGroupConfig(server.CreateGroupConfigHandler)).Methods("POST")                                     //Create Group
+	router.HandleFunc("/groupConfig/{id}", countPostGroupConfigVer(server.PutNewGroupConfigVersionHandler)).Methods("POST")                       //Update Group
+	router.HandleFunc("/groupConfig/{id}/{ver}", countGetGroupConfig(server.GetGroupConfigHandler)).Methods("GET")                                //Find one Group{id}/{version}
+	router.HandleFunc("/groupConfig/{id}/{ver}/singleConfig/", countGetGroupConfigs(server.GetSingleConfigFromGroupConfigHandler)).Methods("GET") //Find one single inside a group version
+	router.HandleFunc("/groupConfig/{id}/{ver}", countDeleteGroupConfig(server.DeleteGroupConfigHandler)).Methods("DELETE")                       //Delete Group Version
+	router.Path("/metrics").Handler(metricsHandler())
 
 	srv := &http.Server{Addr: "0.0.0.0:8000", Handler: router}
 	go func() {

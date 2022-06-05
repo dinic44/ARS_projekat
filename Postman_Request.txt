@@ -30,6 +30,10 @@ FIRST EXAMPLE
             "last": "last1"
         },
         {
+            "name": "name1",
+            "last": "last1"
+        },
+        {
             "name": "name2",
             "last": "last2"
         }

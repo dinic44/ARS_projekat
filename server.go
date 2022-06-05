@@ -15,6 +15,8 @@ type Service struct {
 
 //Create Single
 func (ts *Service) CreateSingleConfigHandler(w http.ResponseWriter, req *http.Request) {
+	requestId := req.Header.Get("x-idempotency-key")
+
 	contentType := req.Header.Get("Content-Type")
 	mediatype, _, err := mime.ParseMediaType(contentType)
 	if err != nil {
@@ -23,7 +25,7 @@ func (ts *Service) CreateSingleConfigHandler(w http.ResponseWriter, req *http.Re
 	}
 
 	if mediatype != "application/json" {
-		err := errors.New("Expect application/json Content-Type")
+		err := errors.New("expect application/json Content-Type")
 		http.Error(w, err.Error(), http.StatusUnsupportedMediaType)
 		return
 	}
@@ -34,12 +36,24 @@ func (ts *Service) CreateSingleConfigHandler(w http.ResponseWriter, req *http.Re
 		return
 	}
 
+	if ts.store.FindRequestId(requestId) == true {
+		http.Error(w, "Already Sent", http.StatusBadRequest)
+		return
+	}
+
 	singleConfig, err := ts.store.CreateSingleConfig(rt)
+	reqId := ""
+	if err == nil {
+		reqId = ts.store.SaveRequestId()
+	}
 	w.Write([]byte(singleConfig.Id))
+	w.Write([]byte("\n\nIdempotency Key: " + reqId))
 }
 
 //Put New {id}
 func (ts *Service) PutNewSingleConfigVersionHandler(w http.ResponseWriter, req *http.Request) {
+	requestId := req.Header.Get("x-idempotency-key")
+
 	contentType := req.Header.Get("Content-Type")
 	mediatype, _, err := mime.ParseMediaType(contentType)
 	id := mux.Vars(req)["id"]
@@ -50,7 +64,7 @@ func (ts *Service) PutNewSingleConfigVersionHandler(w http.ResponseWriter, req *
 	}
 
 	if mediatype != "application/json" {
-		err := errors.New("Expect application/json Content-Type")
+		err := errors.New("expect application/json Content-Type")
 		http.Error(w, err.Error(), http.StatusUnsupportedMediaType)
 		return
 	}
@@ -62,6 +76,9 @@ func (ts *Service) PutNewSingleConfigVersionHandler(w http.ResponseWriter, req *
 	}
 
 	rt.Id = id
+	if ts.store.FindRequestId(requestId) == true {
+		http.Error(w, "Already Sent", http.StatusBadRequest)
+	}
 	singleConfig, err := ts.store.PutNewSingleConfigVersion(rt)
 
 	if err != nil {
@@ -69,7 +86,13 @@ func (ts *Service) PutNewSingleConfigVersionHandler(w http.ResponseWriter, req *
 		return
 	}
 
+	reqId := ""
+	if err == nil {
+		reqId = ts.store.SaveRequestId()
+	}
+
 	w.Write([]byte(singleConfig.Id))
+	w.Write([]byte("\n\nIdempotency Key: " + reqId))
 }
 
 //Get Single {id}
@@ -109,6 +132,8 @@ func (ts *Service) DeleteSingleConfigHandler(w http.ResponseWriter, r *http.Requ
 
 //Create Group
 func (ts *Service) CreateGroupConfigHandler(w http.ResponseWriter, req *http.Request) {
+	requestId := req.Header.Get("x-idempotency-key")
+
 	contentType := req.Header.Get("Content-Type")
 	mediatype, _, err := mime.ParseMediaType(contentType)
 	if err != nil {
@@ -128,13 +153,26 @@ func (ts *Service) CreateGroupConfigHandler(w http.ResponseWriter, req *http.Req
 		return
 	}
 
+	if ts.store.FindRequestId(requestId) == true {
+		http.Error(w, "Already Sent", http.StatusBadRequest)
+		return
+	}
+
 	groupConfig, err := ts.store.CreateGroupConfig(rt)
 
+	reqId := ""
+	if err == nil {
+		reqId = ts.store.SaveRequestId()
+	}
+
 	w.Write([]byte(groupConfig.Id))
+	w.Write([]byte("\n\nIdempotence key: " + reqId))
 }
 
 //Put new{id}
 func (ts *Service) PutNewGroupConfigVersionHandler(w http.ResponseWriter, req *http.Request) {
+	requestId := req.Header.Get("x-idempotency-key")
+
 	contentType := req.Header.Get("Content-Type")
 	mediatype, _, err := mime.ParseMediaType(contentType)
 	id := mux.Vars(req)["id"]
@@ -145,7 +183,7 @@ func (ts *Service) PutNewGroupConfigVersionHandler(w http.ResponseWriter, req *h
 	}
 
 	if mediatype != "application/json" {
-		err := errors.New("Expect application/json Content-Type")
+		err := errors.New("expect application/json Content-Type")
 		http.Error(w, err.Error(), http.StatusUnsupportedMediaType)
 		return
 	}
@@ -156,15 +194,26 @@ func (ts *Service) PutNewGroupConfigVersionHandler(w http.ResponseWriter, req *h
 		return
 	}
 
+	if ts.store.FindRequestId(requestId) == true {
+		http.Error(w, "Already Sent", http.StatusBadRequest)
+		return
+	}
+
 	rt.Id = id
 	groupConfig, err := ts.store.PutNewGroupConfigVersion(rt)
 
+	reqId := ""
+	if err == nil {
+		reqId = ts.store.SaveRequestId()
+	}
+
 	if err != nil {
-		http.Error(w, "already exists", http.StatusBadRequest)
+		http.Error(w, "Already Exists", http.StatusBadRequest)
 		return
 	}
 
 	w.Write([]byte(groupConfig.Id))
+	w.Write([]byte("\n\nIdempotence key: " + reqId))
 }
 
 //Find One from Group {id}/{version}
