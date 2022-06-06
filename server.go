@@ -15,9 +15,9 @@ type Service struct {
 
 //Create Single
 func (ts *Service) CreateSingleConfigHandler(w http.ResponseWriter, req *http.Request) {
+	contentType := req.Header.Get("Content-Type")
 	requestId := req.Header.Get("x-idempotency-key")
 
-	contentType := req.Header.Get("Content-Type")
 	mediatype, _, err := mime.ParseMediaType(contentType)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -32,7 +32,7 @@ func (ts *Service) CreateSingleConfigHandler(w http.ResponseWriter, req *http.Re
 
 	rt, err := decodeBodySingle(req.Body)
 	if err != nil || rt.Version == "" || rt.Entries == nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, "Invalid JSON format", http.StatusBadRequest)
 		return
 	}
 
@@ -52,9 +52,9 @@ func (ts *Service) CreateSingleConfigHandler(w http.ResponseWriter, req *http.Re
 
 //Put New {id}
 func (ts *Service) PutNewSingleConfigVersionHandler(w http.ResponseWriter, req *http.Request) {
+	contentType := req.Header.Get("Content-Type")
 	requestId := req.Header.Get("x-idempotency-key")
 
-	contentType := req.Header.Get("Content-Type")
 	mediatype, _, err := mime.ParseMediaType(contentType)
 	id := mux.Vars(req)["id"]
 
@@ -82,7 +82,7 @@ func (ts *Service) PutNewSingleConfigVersionHandler(w http.ResponseWriter, req *
 	singleConfig, err := ts.store.PutNewSingleConfigVersion(rt)
 
 	if err != nil {
-		http.Error(w, "error", http.StatusBadRequest)
+		http.Error(w, "Version Already Exists", http.StatusBadRequest)
 		return
 	}
 
@@ -104,7 +104,7 @@ func (ts *Service) GetSingleConfigVersionHandler(w http.ResponseWriter, req *htt
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
-	renderJSON(w, task)
+	renderJSON(w, task, "")
 }
 
 //Find One Single/{id}/{version}
@@ -117,7 +117,7 @@ func (ts *Service) FindSingleConfigHandler(w http.ResponseWriter, req *http.Requ
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
-	renderJSON(w, task)
+	renderJSON(w, task, "")
 }
 
 //Delete Single
@@ -132,9 +132,9 @@ func (ts *Service) DeleteSingleConfigHandler(w http.ResponseWriter, r *http.Requ
 
 //Create Group
 func (ts *Service) CreateGroupConfigHandler(w http.ResponseWriter, req *http.Request) {
+	contentType := req.Header.Get("Content-Type")
 	requestId := req.Header.Get("x-idempotency-key")
 
-	contentType := req.Header.Get("Content-Type")
 	mediatype, _, err := mime.ParseMediaType(contentType)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -171,9 +171,9 @@ func (ts *Service) CreateGroupConfigHandler(w http.ResponseWriter, req *http.Req
 
 //Put new{id}
 func (ts *Service) PutNewGroupConfigVersionHandler(w http.ResponseWriter, req *http.Request) {
+	contentType := req.Header.Get("Content-Type")
 	requestId := req.Header.Get("x-idempotency-key")
 
-	contentType := req.Header.Get("Content-Type")
 	mediatype, _, err := mime.ParseMediaType(contentType)
 	id := mux.Vars(req)["id"]
 
@@ -227,7 +227,7 @@ func (ts *Service) GetGroupConfigHandler(w http.ResponseWriter, req *http.Reques
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
-	renderJSON(w, task)
+	renderJSON(w, task, "")
 }
 
 //Find Single Key:Value from version of a group
@@ -242,7 +242,7 @@ func (ts *Service) GetSingleConfigFromGroupConfigHandler(w http.ResponseWriter, 
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
-	renderJSON(w, label)
+	renderJSON(w, label, "")
 }
 
 //Delete {id}/{ver}

@@ -29,7 +29,7 @@ func decodeBodyGroup(r io.Reader) (*cs.GroupConfig, error) {
 	return groupConfig, nil
 }
 
-func renderJSON(w http.ResponseWriter, v interface{}) {
+func renderJSON(w http.ResponseWriter, v interface{}, id string) {
 	js, err := json.Marshal(v)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
